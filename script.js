@@ -50,12 +50,32 @@ let tryOnEnabled = true
 
 function playSound(audio) {
     if (soundEnabled && audio) {
-        audio.currentTime = 0
-        audio.play().catch(err => console.warn('Audio play error:', err))
+        try {
+            audio.currentTime = 0
+            var promise = audio.play()
+            if (promise && typeof promise.catch === 'function') {
+                promise.catch(function () { })
+            }
+        } catch (e) { }
     }
 }
 
 let clothesData = {}
+let clothesLookupMap = {}
+
+function initClothesLookup() {
+    clothesLookupMap = {}
+    if (!clothesData) return
+    Object.keys(clothesData).forEach(function (key) {
+        var item = clothesData[key]
+        if (!item) return
+        clothesLookupMap[key] = item
+        var relativeKey = key.replace(/^.*(?=assets\/)/, '')
+        clothesLookupMap[relativeKey] = item
+        var filename = key.split('/').pop()
+        clothesLookupMap[filename] = item
+    })
+}
 let currentSeason = 'winter'
 let selectedTopType = null
 let selectedBottomType = null
@@ -80,6 +100,7 @@ function buildCarouselsFromData() {
 
         const img = document.createElement('img')
         img.src = src
+        img.setAttribute('data-key', src)
         img.classList.add('noDisplay')
 
         if (topTypes.includes(item.type)) {
@@ -92,7 +113,14 @@ function buildCarouselsFromData() {
     })
 }
 
+let saveStateTimeout = null
 function saveState() {
+    if (saveStateTimeout) clearTimeout(saveStateTimeout)
+    saveStateTimeout = setTimeout(saveStateImmediately, 200)
+}
+
+function saveStateImmediately() {
+    if (saveStateTimeout) clearTimeout(saveStateTimeout)
     try {
         const state = {
             currentSeason,
@@ -108,6 +136,10 @@ function saveState() {
     } catch (e) {
         console.warn('Could not save state to localStorage:', e)
     }
+}
+
+if (typeof window !== 'undefined') {
+    window.addEventListener('beforeunload', saveStateImmediately)
 }
 
 function restoreSavedState() {
@@ -205,6 +237,7 @@ fetch('clothes.json')
     .then(response => response.json())
     .then(data => {
         clothesData = data
+        initClothesLookup()
         buildCarouselsFromData()
 
         const savedState = restoreSavedState()
@@ -350,15 +383,14 @@ typeFilterBtns.forEach(btn => {
 
 function getGarmentData(img) {
     if (!img) return null
-    const src = img.getAttribute('src') || img.src || ''
-    if (clothesData[src]) return clothesData[src]
-
-    const relativeSrc = src.replace(/^.*(?=assets\/)/, '')
-    if (clothesData[relativeSrc]) return clothesData[relativeSrc]
-
-    const filename = src.split('/').pop()
-    const foundKey = Object.keys(clothesData).find(k => k.endsWith(filename))
-    return foundKey ? clothesData[foundKey] : null
+    var key = img.getAttribute('data-key')
+    if (key && clothesLookupMap[key]) return clothesLookupMap[key]
+    var src = img.getAttribute('src') || img.src || ''
+    if (clothesLookupMap[src]) return clothesLookupMap[src]
+    var relativeSrc = src.replace(/^.*(?=assets\/)/, '')
+    if (clothesLookupMap[relativeSrc]) return clothesLookupMap[relativeSrc]
+    var filename = src.split('/').pop()
+    return clothesLookupMap[filename] || null
 }
 
 function getAvailableImages(carousel) {
@@ -738,9 +770,9 @@ async function runVirtualTryOn() {
     }, 3000)
 }
 
-function setRandomImage(carousel, isTop) {
-    const available = getAvailableImages(carousel)
-    if (available.length === 0) return
+function setRandomImage(carousel, isTop, prefilteredAvailable) {
+    const available = prefilteredAvailable || getAvailableImages(carousel)
+    if (!available || available.length === 0) return
 
     for (let i = 0; i < carousel.length; i++) {
         carousel[i].classList.add('noDisplay')
@@ -760,12 +792,15 @@ if (browseBtn) {
     browseBtn.addEventListener('click', function () {
         playSound(clickSound)
 
+        const availableTops = getAvailableImages(topCarousel)
+        const availableBottoms = !isVestidosMode ? getAvailableImages(bottomCarousel) : []
+
         let count = 0
         const maxCycles = 8
         const interval = setInterval(() => {
-            setRandomImage(topCarousel, true)
+            setRandomImage(topCarousel, true, availableTops)
             if (!isVestidosMode) {
-                setRandomImage(bottomCarousel, false)
+                setRandomImage(bottomCarousel, false, availableBottoms)
             }
             playSound(clickSound)
             count++

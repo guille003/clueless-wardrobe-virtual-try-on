@@ -1,4 +1,4 @@
-const CACHE_NAME = 'clueless-closet-v1';
+const CACHE_NAME = 'clueless-closet-v2';
 
 const PRECACHE_ASSETS = [
     './',
@@ -78,31 +78,64 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Fetch Event - Cache First, Network Fallback with Dynamic Caching
+// Fetch Event - Intercept Navigation and Assets (Cache-First with Navigation Fallback)
 self.addEventListener('fetch', (event) => {
     if (event.request.method !== 'GET') return;
 
+    try {
+        const url = new URL(event.request.url);
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') return;
+    } catch (e) {
+        return;
+    }
+
+    // Intercept HTML Navigation Requests (iOS standalone PWA cold start / offline resume)
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
+                if (cachedResponse) {
+                    return cachedResponse;
+                }
+                // Try network if not immediately in cache
+                return fetch(event.request).catch(() => {
+                    // Offline fallback: serve cached index.html or root
+                    return caches.match('./index.html').then((fallback) => {
+                        return fallback || caches.match('./');
+                    });
+                });
+            }).catch(() => {
+                return caches.match('./index.html').then((fallback) => {
+                    return fallback || caches.match('./');
+                });
+            })
+        );
+        return;
+    }
+
+    // Subresources (CSS, JS, images, audio, etc.) - Cache First, Network Fallback
     event.respondWith(
-        caches.match(event.request).then((cachedResponse) => {
+        caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
             if (cachedResponse) {
                 return cachedResponse;
             }
 
             return fetch(event.request)
                 .then((networkResponse) => {
-                    if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+                    if (!networkResponse || networkResponse.status !== 200 || (networkResponse.type !== 'basic' && networkResponse.type !== 'cors')) {
                         return networkResponse;
                     }
 
                     const responseToCache = networkResponse.clone();
                     caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(event.request, responseToCache);
+                        cache.put(event.request, responseToCache).catch(function () {
+                            // Suppress cache write error for non-standard responses
+                        });
                     });
 
                     return networkResponse;
                 })
                 .catch((error) => {
-                    console.error('[Service Worker] Network request failed:', error);
+                    console.error('[Service Worker] Network request failed for asset:', event.request.url, error);
                 });
         })
     );
