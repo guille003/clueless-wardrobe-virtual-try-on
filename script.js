@@ -8,8 +8,8 @@ if ('serviceWorker' in navigator) {
 
 const topContainer = document.querySelector('#topCarousel .carouselContainer')
 const bottomContainer = document.querySelector('#bottomCarousel .carouselContainer')
-const topCarousel = topContainer.children
-const bottomCarousel = bottomContainer.children
+const topCarousel = topContainer ? topContainer.children : []
+const bottomCarousel = bottomContainer ? bottomContainer.children : []
 
 const carouselBtnDiv = document.querySelectorAll('.carouselBtnDiv')
 const dressMeBtn = document.getElementById('dressMeBtn')
@@ -28,6 +28,13 @@ const closeTryOnBtn = document.getElementById('closeTryOnBtn')
 const tryOnStatus = document.getElementById('tryOnStatus')
 const tryOnStatusText = document.getElementById('tryOnStatusText')
 
+const settingsBtn = document.getElementById('settingsBtn')
+const settingsModalDiv = document.getElementById('settingsModalDiv')
+const toggleSoundBtn = document.getElementById('toggleSoundBtn')
+const toggleTryOnBtn = document.getElementById('toggleTryOnBtn')
+const closeSettingsBtn = document.getElementById('closeSettingsBtn')
+const settingsModalShadow = document.getElementById('settingsModalShadow')
+
 const selectedModelPath = 'assets/images/models/modelo_isa_1.png'
 let popUpTimeout = null
 
@@ -38,6 +45,15 @@ const clickSound = new Audio('assets/audio/lclick-13694.mp3')
 const wrongSound = new Audio('assets/audio/mixkit-wrong-long-buzzer-954.wav')
 const correctSound = new Audio('assets/audio/mixkit-winning-chimes-2015.wav')
 
+let soundEnabled = true
+let tryOnEnabled = true
+
+function playSound(audio) {
+    if (soundEnabled && audio) {
+        audio.currentTime = 0
+        audio.play().catch(err => console.warn('Audio play error:', err))
+    }
+}
 
 let clothesData = {}
 let currentSeason = 'winter'
@@ -83,6 +99,8 @@ function saveState() {
             selectedTopType,
             selectedBottomType,
             isVestidosMode,
+            soundEnabled,
+            tryOnEnabled,
             currentTopSrc: currentTop ? (currentTop.getAttribute('src') || currentTop.src) : null,
             currentBottomSrc: currentBottom ? (currentBottom.getAttribute('src') || currentBottom.src) : null
         }
@@ -100,6 +118,74 @@ function restoreSavedState() {
     } catch (e) {
         return null
     }
+}
+
+function updateSettingsUI() {
+    if (toggleSoundBtn) {
+        toggleSoundBtn.innerText = soundEnabled ? 'ON' : 'OFF'
+        if (soundEnabled) {
+            toggleSoundBtn.classList.remove('settingOff')
+        } else {
+            toggleSoundBtn.classList.add('settingOff')
+        }
+    }
+    if (toggleTryOnBtn) {
+        toggleTryOnBtn.innerText = tryOnEnabled ? 'ON' : 'OFF'
+        if (tryOnEnabled) {
+            toggleTryOnBtn.classList.remove('settingOff')
+        } else {
+            toggleTryOnBtn.classList.add('settingOff')
+        }
+    }
+}
+
+// Initial settings restoration
+const initialSavedState = restoreSavedState()
+if (initialSavedState) {
+    if (initialSavedState.soundEnabled !== undefined) soundEnabled = initialSavedState.soundEnabled
+    if (initialSavedState.tryOnEnabled !== undefined) tryOnEnabled = initialSavedState.tryOnEnabled
+}
+updateSettingsUI()
+
+if (settingsBtn && settingsModalDiv) {
+    settingsBtn.addEventListener('click', function (e) {
+        e.stopPropagation()
+        playSound(clickSound)
+        updateSettingsUI()
+        settingsModalDiv.classList.remove('noDisplay')
+    })
+}
+
+if (closeSettingsBtn && settingsModalDiv) {
+    closeSettingsBtn.addEventListener('click', function () {
+        playSound(clickSound)
+        settingsModalDiv.classList.add('noDisplay')
+    })
+}
+
+if (settingsModalShadow && settingsModalDiv) {
+    settingsModalShadow.addEventListener('click', function () {
+        playSound(clickSound)
+        settingsModalDiv.classList.add('noDisplay')
+    })
+}
+
+if (toggleSoundBtn) {
+    toggleSoundBtn.addEventListener('click', function () {
+        soundEnabled = !soundEnabled
+        if (soundEnabled) playSound(clickSound)
+        updateSettingsUI()
+        saveState()
+    })
+}
+
+if (toggleTryOnBtn) {
+    toggleTryOnBtn.addEventListener('click', function () {
+        playSound(clickSound)
+        tryOnEnabled = !tryOnEnabled
+        updateSettingsUI()
+        saveState()
+    })
 }
 
 function updateSeasonDropdownOrder() {
@@ -177,8 +263,7 @@ if (seasonBtn && seasonDropdown) {
         e.stopPropagation()
         updateSeasonDropdownOrder()
         seasonDropdown.classList.toggle('noDisplay')
-        clickSound.play()
-        clickSound.currentTime = 0
+        playSound(clickSound)
     })
 
     document.addEventListener('click', function () {
@@ -195,8 +280,7 @@ if (seasonBtn && seasonDropdown) {
             seasonBtn.innerText = this.innerText
             updateSeasonDropdownOrder()
             seasonDropdown.classList.add('noDisplay')
-            clickSound.play()
-            clickSound.currentTime = 0
+            playSound(clickSound)
             applySeasonFilter()
             saveState()
         })
@@ -208,8 +292,7 @@ typeFilterBtns.forEach(btn => {
         const type = this.getAttribute('data-type')
         const category = this.getAttribute('data-category')
 
-        clickSound.play()
-        clickSound.currentTime = 0
+        playSound(clickSound)
 
         if (category === 'dress' || type === 'vestidos') {
             if (isVestidosMode) {
@@ -451,57 +534,59 @@ for (const btnDiv of carouselBtnDiv) {
                 }
             }
         }
-        clickSound.play()
-        clickSound.currentTime = 0
+        playSound(clickSound)
         saveState()
     })
 }
 
-dressMeBtn.addEventListener('click', function (e) {
-    clickSound.play()
-    clickSound.currentTime = 0
+if (dressMeBtn) {
+    dressMeBtn.addEventListener('click', function (e) {
+        playSound(clickSound)
 
-    const isMatch = checkOutfitMatch(currentTop, currentBottom)
+        const isMatch = checkOutfitMatch(currentTop, currentBottom)
 
-    if (popUpTimeout) clearTimeout(popUpTimeout)
+        if (popUpTimeout) clearTimeout(popUpTimeout)
 
-    popUpDiv.classList.remove('noDisplay')
-    if (popUpButtons) popUpButtons.classList.add('noDisplay')
+        popUpDiv.classList.remove('noDisplay')
+        if (popUpButtons) popUpButtons.classList.add('noDisplay')
 
-    if (isMatch) {
-        if (popUpText) popUpText.innerText = "IT'S A MATCH!"
-        else popUp.innerText = "IT'S A MATCH!"
-        correctSound.play()
-        correctSound.currentTime = 0
+        if (isMatch) {
+            if (popUpText) popUpText.innerText = "IT'S A MATCH!"
+            else popUp.innerText = "IT'S A MATCH!"
+            playSound(correctSound)
 
-        popUpTimeout = setTimeout(() => {
-            if (popUpText) popUpText.innerText = "DO YOU WANT TO SEE HOW IT LOOKS?"
-            if (popUpButtons) popUpButtons.classList.remove('noDisplay')
-        }, 1200)
-    } else {
-        if (popUpText) popUpText.innerText = "MIS-MATCH!"
-        else popUp.innerText = "MIS-MATCH!"
-        wrongSound.play()
-        wrongSound.currentTime = 0
+            if (tryOnEnabled) {
+                popUpTimeout = setTimeout(() => {
+                    if (popUpText) popUpText.innerText = "DO YOU WANT TO SEE HOW IT LOOKS?"
+                    if (popUpButtons) popUpButtons.classList.remove('noDisplay')
+                }, 1200)
+            } else {
+                popUpTimeout = setTimeout(() => {
+                    closePopUp()
+                }, 1500)
+            }
+        } else {
+            if (popUpText) popUpText.innerText = "MIS-MATCH!"
+            else popUp.innerText = "MIS-MATCH!"
+            playSound(wrongSound)
 
-        popUpTimeout = setTimeout(() => {
-            closePopUp()
-        }, 1200)
-    }
-})
+            popUpTimeout = setTimeout(() => {
+                closePopUp()
+            }, 1200)
+        }
+    })
+}
 
 if (popUpNoBtn) {
     popUpNoBtn.addEventListener('click', function () {
-        clickSound.play()
-        clickSound.currentTime = 0
+        playSound(clickSound)
         closePopUp()
     })
 }
 
 if (popUpYesBtn) {
     popUpYesBtn.addEventListener('click', function () {
-        clickSound.play()
-        clickSound.currentTime = 0
+        playSound(clickSound)
         closePopUp()
         openTryOnContainer()
     })
@@ -554,16 +639,14 @@ function closeTryOnContainer() {
 
 if (closeTryOnBtn) {
     closeTryOnBtn.addEventListener('click', function () {
-        clickSound.play()
-        clickSound.currentTime = 0
+        playSound(clickSound)
         closeTryOnContainer()
     })
 }
 
 if (runTryOnBtn) {
     runTryOnBtn.addEventListener('click', function () {
-        clickSound.play()
-        clickSound.currentTime = 0
+        playSound(clickSound)
         runVirtualTryOn()
     })
 }
@@ -665,8 +748,7 @@ function setRandomImage(carousel, isTop) {
 
 if (browseBtn) {
     browseBtn.addEventListener('click', function () {
-        clickSound.play()
-        clickSound.currentTime = 0
+        playSound(clickSound)
 
         let count = 0
         const maxCycles = 8
@@ -675,8 +757,7 @@ if (browseBtn) {
             if (!isVestidosMode) {
                 setRandomImage(bottomCarousel, false)
             }
-            clickSound.play()
-            clickSound.currentTime = 0
+            playSound(clickSound)
             count++
             if (count >= maxCycles) {
                 clearInterval(interval)

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Clueless Closet">
+    <link rel="apple-touch-icon" href="assets/images/icon-192.png">
+    <link rel="stylesheet" href="reset.css">
+    <link rel="stylesheet" href="styles.css">
+    <title>More Characters | CHER'S WARDROBE</title>
+    <link rel="icon" type="image/x-icon" href="assets/images/pc.png">
+</head>
+
+<body>
+
+    <nav>
+        <ul>
+            <li>ISA'S WARDROBE</li>
+            <li></li>
+            <li><div class="smallBtn" id="settingsBtn">⚙</div></li>
+        </ul>
+    </nav>
+
+    <main>
+        <div class="moreMainDiv">
+            <div class="moreBox">
+                <div class="characterCard">
+                    <div class="imgWrapper">
+                        <img src="assets/images/more/josh.jpeg" alt="Josh">
+                    </div>
+                    <span class="characterName">Josh</span>
+                </div>
+
+                <div class="characterCard">
+                    <div class="imgWrapper">
+                        <img src="assets/images/more/Isa2.jpeg" alt="Isabel">
+                    </div>
+                    <span class="characterName">Isabel</span>
+                </div>
+
+                <div class="characterCard">
+                    <div class="imgWrapper">
+                        <img src="assets/images/more/Tai.jpeg" alt="Tai Frasier">
+                    </div>
+                    <span class="characterName">Tai Frasier</span>
+                </div>
+
+                <div class="characterCard">
+                    <div class="imgWrapper">
+                        <img src="assets/images/more/Travis.png" alt="Travis Birkenstock">
+                    </div>
+                    <span class="characterName">Travis Birkenstock</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <ul class="moreFooterUl">
+            <li>
+                <a href="index.html"><div class="smallBtn">BACK</div></a>
+            </li>
+        </ul>
+    </footer>
+
+    <aside id="settingsModalDiv" class="noDisplay">
+        <div id="settingsModal">
+            <div class="settingsTitle">SETTINGS</div>
+            <div class="settingsRow">
+                <span>SOUND EFFECTS</span>
+                <button id="toggleSoundBtn" class="smallBtn">ON</button>
+            </div>
+            <div class="settingsRow">
+                <span>VIRTUAL TRY-ON</span>
+                <button id="toggleTryOnBtn" class="smallBtn">ON</button>
+            </div>
+            <button id="closeSettingsBtn" class="smallBtn">CLOSE</button>
+        </div>
+        <div id="settingsModalShadow"></div>
+    </aside>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

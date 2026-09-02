@@ -3,6 +3,7 @@ const CACHE_NAME = 'clueless-closet-v1';
 const PRECACHE_ASSETS = [
     './',
     './index.html',
+    './more.html',
     './manifest.json',
     './reset.css',
     './styles.css',
@@ -15,6 +16,10 @@ const PRECACHE_ASSETS = [
     './assets/images/overlay.jpg',
     './assets/images/header.gif',
     './assets/images/models/modelo_isa_1.png',
+    './assets/images/more/josh.jpeg',
+    './assets/images/more/Isa.png',
+    './assets/images/more/Tai.jpeg',
+    './assets/images/more/Travis.png',
     './assets/audio/lclick-13694.mp3',
     './assets/audio/mixkit-winning-chimes-2015.wav',
     './assets/audio/mixkit-wrong-long-buzzer-954.wav',
