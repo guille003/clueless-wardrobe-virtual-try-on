@@ -17,7 +17,7 @@ const PRECACHE_ASSETS = [
     './assets/images/header.gif',
     './assets/images/models/modelo_isa_1.png',
     './assets/images/more/josh.jpeg',
-    './assets/images/more/Isa.png',
+    './assets/images/more/Isa.jpeg',
     './assets/images/more/Tai.jpeg',
     './assets/images/more/Travis.png',
     './assets/audio/lclick-13694.mp3',

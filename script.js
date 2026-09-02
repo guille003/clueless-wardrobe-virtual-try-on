@@ -663,6 +663,15 @@ async function prepareGarmentBlob(topImg, bottomImg) {
     return await urlToBlob(src)
 }
 
+async function safeDynamicImport(moduleUrl) {
+    try {
+        const dynamicImportFn = new Function('url', 'return import(url)')
+        return await dynamicImportFn(moduleUrl)
+    } catch (err) {
+        throw new Error('Dynamic module import is not supported in this browser: ' + err.message)
+    }
+}
+
 async function runVirtualTryOn() {
     if (!tryOnStatus || !tryOnModelImg) return
 
@@ -685,7 +694,8 @@ async function runVirtualTryOn() {
     }
 
     try {
-        const { Client, handle_file } = await import('https://cdn.jsdelivr.net/npm/@gradio/client/+esm')
+        const gradioModule = await safeDynamicImport('https://cdn.jsdelivr.net/npm/@gradio/client/+esm')
+        const { Client, handle_file } = gradioModule
         if (tryOnStatusText) tryOnStatusText.innerText = "GENERATING TRY-ON WITH IDM-VTON..."
 
         const modelBlob = await urlToBlob(modelSrc)
