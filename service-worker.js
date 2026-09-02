@@ -1,4 +1,4 @@
-const CACHE_NAME = 'clueless-closet-v2';
+const CACHE_NAME = 'clueless-closet-v3';
 
 const PRECACHE_ASSETS = [
     './',
@@ -14,7 +14,6 @@ const PRECACHE_ASSETS = [
     './assets/images/icon-512.png',
     './assets/images/leopardPattern.png',
     './assets/images/overlay.jpg',
-    './assets/images/header.gif',
     './assets/images/models/modelo_isa_1.png',
     './assets/images/more/josh.jpeg',
     './assets/images/more/Isa.jpeg',
@@ -23,6 +22,7 @@ const PRECACHE_ASSETS = [
     './assets/audio/lclick-13694.mp3',
     './assets/audio/mixkit-winning-chimes-2015.wav',
     './assets/audio/mixkit-wrong-long-buzzer-954.wav',
+    './assets/fonts/Pixellari/stylesheet.css',
     './assets/fonts/Pixellari/Pixellari.woff',
     './assets/fonts/Pixellari/Pixellari.woff2',
     './assets/images/clothes/camiseta_corta_gris_basica.png',
@@ -50,19 +50,24 @@ const PRECACHE_ASSETS = [
     './assets/images/clothes/vestido_granate_cruzado.png'
 ];
 
-// Install Event - Precache essential static assets
+// Install Event - Resilient Precache
 self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then((cache) => {
-                console.log('[Service Worker] Precaching essential assets');
-                return cache.addAll(PRECACHE_ASSETS);
-            })
-            .then(() => self.skipWaiting())
+        caches.open(CACHE_NAME).then(async (cache) => {
+            console.log('[Service Worker] Precaching essential assets');
+            // Cache items individually so a single network glitch or asset issue won't fail the SW install
+            await Promise.allSettled(
+                PRECACHE_ASSETS.map((asset) =>
+                    cache.add(asset).catch((err) => {
+                        console.warn('[Service Worker] Failed to precache asset:', asset, err);
+                    })
+                )
+            );
+        }).then(() => self.skipWaiting())
     );
 });
 
-// Activate Event - Clean up old caches
+// Activate Event - Clean up old caches & take control immediately
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
@@ -89,18 +94,29 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Intercept HTML Navigation Requests (iOS standalone PWA cold start / offline resume)
-    if (event.request.mode === 'navigate') {
+    const isNavigation = event.request.mode === 'navigate' ||
+                         event.request.destination === 'document' ||
+                         (event.request.headers && event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html'));
+
+    // Handle Navigation / Document Requests (iOS PWA launch & reload)
+    if (isNavigation) {
         event.respondWith(
             caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
                 if (cachedResponse) {
                     return cachedResponse;
                 }
-                // Try network if not immediately in cache
-                return fetch(event.request).catch(() => {
-                    // Offline fallback: serve cached index.html or root
-                    return caches.match('./index.html').then((fallback) => {
-                        return fallback || caches.match('./');
+
+                // If exact request match failed, check index.html or root in cache
+                return caches.match('./index.html').then((indexFallback) => {
+                    if (indexFallback) {
+                        return indexFallback;
+                    }
+                    return caches.match('./').then((rootFallback) => {
+                        if (rootFallback) {
+                            return rootFallback;
+                        }
+                        // Try network as last resort
+                        return fetch(event.request);
                     });
                 });
             }).catch(() => {
@@ -127,7 +143,7 @@ self.addEventListener('fetch', (event) => {
 
                     const responseToCache = networkResponse.clone();
                     caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(event.request, responseToCache).catch(function () {
+                        cache.put(event.request, responseToCache).catch(() => {
                             // Suppress cache write error for non-standard responses
                         });
                     });
