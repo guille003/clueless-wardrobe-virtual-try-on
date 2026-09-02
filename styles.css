@@ -1,0 +1,426 @@
+@font-face {
+    font-family: "Pixellari";
+    src: url("assets/fonts/Pixellari/Pixellari.woff2") format("woff2"),
+        url("assets/fonts/Pixellari/Pixellari.woff") format("woff");
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+#overlay {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: url("assets/images/overlay.jpg");
+    background-size: cover;
+    mix-blend-mode: multiply;
+    opacity: 0.2;
+    pointer-events: none;
+    z-index: 3;
+}
+
+#popUp,
+#popUpShadow {
+    position: absolute;
+    width: 73vw;
+    min-height: 12vw;
+    left: 50%;
+    top: 50%;
+    padding: 1.5vw;
+    box-sizing: border-box;
+}
+
+#popUp {
+    background-color: white;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 5vw;
+    text-align: center;
+    outline: 0.5vmin solid black;
+    z-index: 10;
+}
+
+#popUpText {
+    margin-bottom: 1vw;
+}
+
+#popUpButtons {
+    display: flex;
+    gap: 2vw;
+    justify-content: center;
+    width: 100%;
+}
+
+#popUpButtons button {
+    padding: 0.5vw 2vw;
+    font-size: 3vw;
+}
+
+#popUpShadow {
+    background-color: black;
+    transform: translate(-48%, -40%);
+    opacity: 0.8;
+    z-index: 9;
+}
+
+body {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: "Pixellari";
+    overflow: hidden;
+}
+
+main {
+    flex: 1;
+    background: palevioletred;
+    overflow: hidden;
+}
+
+a {
+    text-decoration: none;
+}
+
+nav {
+    position: relative;
+}
+
+nav,
+footer {
+    height: 3%;
+    background: black;
+    display: flex;
+    align-items: center;
+    padding: 2.5vmin;
+}
+
+main {
+    flex: 1;
+    background: palevioletred;
+}
+
+nav>ul,
+footer>ul {
+    width: 100%;
+    color: white;
+    font-size: 2.5vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+nav>ul>li {
+    width: 33.33%;
+    text-shadow: -0.2vw -0.1vw gray;
+    display: flex;
+    align-items: center;
+}
+
+nav>ul>li:nth-of-type(1) {
+    justify-content: flex-start;
+}
+
+nav>ul>li:nth-of-type(2) {
+    justify-content: center;
+    text-align: center;
+}
+
+nav>ul>li:nth-of-type(3) {
+    justify-content: flex-end;
+}
+
+footer>ul>li {
+    cursor: pointer;
+    text-shadow: -0.2vw -0.1vw gray;
+    transition: color 0.2s, text-shadow 0.2s;
+}
+
+footer>ul>li.activeFilter {
+    color: #ffff00;
+    text-shadow: 0.1vw 0.1vw 0px #ff007f, -0.1vw -0.1vw 0px #000;
+    text-decoration: underline;
+}
+
+main>div {
+    width: 100%;
+    height: 100%;
+    background-image: url("assets/images/leopardPattern.png");
+    background-size: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#clothesDiv {
+    height: 100%;
+    width: 35vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.carouselBtnDiv {
+    width: 100%;
+    height: 8vh;
+    display: flex;
+    justify-content: center;
+}
+
+#topCarousel,
+#bottomCarousel {
+    flex: 1;
+    width: 100%;
+    box-sizing: border-box;
+    background: white;
+}
+
+#clothesDiv.vestidosActive #bottomCarousel,
+#clothesDiv.vestidosActive .carouselBtnDiv:nth-of-type(2) {
+    display: none !important;
+}
+
+#clothesDiv.vestidosActive #topCarousel {
+    flex: 2;
+}
+
+.carouselContainer {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+img {
+    height: 70%;
+    width: 70%;
+    object-fit: contain;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.noDisplay {
+    display: none !important;
+}
+
+
+/*!Button Styles*/
+.smallBtn,
+.bigBtn,
+.carouselBtn {
+    cursor: pointer;
+}
+
+.smallBtn:focus,
+.smallBtn:hover,
+.bigBtn,
+.bigBtn:active,
+.carouselBtn,
+.carouselBtn:active {
+    color: black;
+}
+
+
+.smallBtn:focus,
+.smallBtn:hover,
+.bigBtn:active,
+.carouselBtn:active {
+    background: #3330c9;
+}
+
+.smallBtn:focus,
+.smallBtn:hover,
+.bigBtn:active,
+.carouselBtn:active {
+    text-shadow: -0.2vw -0.1vw gray;
+    border-bottom-color: #000;
+    border-left-color: #a6b3ff;
+    border-right-color: #000;
+    border-top-color: #a6b3ff;
+}
+
+#topCarousel,
+#bottomCarousel,
+.carouselBtn {
+    border-bottom: 0.7vw inset #000;
+    border-left: 0.7vw inset #f1ebff;
+    border-right: 0.7vw inset #000;
+    border-top: 0.7vw inset #f1ebff;
+}
+
+.smallBtn {
+    width: auto;
+    padding: 0.4vw;
+    color: white;
+    background: #202020;
+    border-bottom: 0.4vw inset #000;
+    border-left: 0.4vw inset #9f9fa2;
+    border-right: 0.4vw inset #000;
+    border-top: 0.4vw inset #9f9fa2;
+    box-sizing: border-box;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.4vw;
+    text-align: center;
+}
+
+.seasonContainer {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+#seasonDropdown {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 100;
+    background: black;
+    padding: 0;
+    width: max-content;
+}
+
+#seasonDropdown .seasonOption {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    white-space: nowrap;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.bigBtn {
+    background: #91919d;
+    border-bottom: 1.3vw inset #000;
+    border-left: 1.3vw inset #f1ebff;
+    border-right: 1.3vw inset #000;
+    border-top: 1.3vw inset #f1ebff;
+    font-size: 3.5vw;
+    padding: 2vw 0.8vw;
+    padding-top: 3vw;
+    align-self: end;
+    min-width: 18vw;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.carouselBtn {
+    background: #91919d;
+    font-size: 5vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.carouselBtn:nth-of-type(odd) {
+    flex: 2;
+}
+
+.carouselBtn:nth-of-type(even) {
+    flex: 1.5;
+}
+
+/* Virtual Try-On Container Styles */
+#tryOnContainer {
+    height: 100%;
+    max-height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border-bottom: 0.7vw inset #000;
+    border-left: 0.7vw inset #f1ebff;
+    border-right: 0.7vw inset #000;
+    border-top: 0.7vw inset #f1ebff;
+    box-sizing: border-box;
+    padding: 0.5vw;
+    overflow: hidden;
+}
+
+.tryOnPreviewArea {
+    flex: 1;
+    height: 0;
+    min-height: 0;
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f8f8f8;
+    border: 0.3vw inset #000;
+    overflow: hidden;
+}
+
+#tryOnModelImg {
+    height: 100%;
+    width: 100%;
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+    position: relative;
+}
+
+.tryOnControls {
+    display: flex;
+    justify-content: space-around;
+    gap: 0.5vw;
+    margin-top: 0.4vw;
+}
+
+.tryOnControls button {
+    flex: 1;
+    font-size: 1.6vw;
+    padding: 0.3vw;
+}
+
+#tryOnStatus {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.82);
+    color: #ffff00;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1vw;
+    font-size: 1.6vw;
+    z-index: 5;
+    text-align: center;
+    padding: 0.8vw;
+    box-sizing: border-box;
+}
+
+.spinner {
+    width: 3.5vw;
+    height: 3.5vw;
+    border: 0.5vw solid #fff;
+    border-top-color: #ff007f;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

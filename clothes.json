@@ -1,0 +1,186 @@
+{
+  "assets/images/clothes/camiseta_corta_gris_basica.png": {
+    "material": "cotton",
+    "color": "gris",
+    "fit": "fitted",
+    "style": "casual",
+    "season": "summer",
+    "type": "camiseta"
+  },
+  "assets/images/clothes/falda_corta_blanca_vaquera.png": {
+    "material": "denim",
+    "color": "blanco",
+    "fit": "skinny",
+    "style": "casual",
+    "season": "summer",
+    "type": "falda"
+  },
+  "assets/images/clothes/falda_larga_azul_rallas_blancas.png": {
+    "material": "cotton",
+    "color": "azul",
+    "fit": "baggy",
+    "style": "casual",
+    "season": "summer",
+    "type": "falda"
+  },
+  "assets/images/clothes/falda_larga_blanca_volantes.png": {
+    "material": "cotton",
+    "color": "blanco",
+    "fit": "baggy",
+    "style": "casual",
+    "season": "summer",
+    "type": "falda"
+  },
+  "assets/images/clothes/falda_larga_negra_normal.png": {
+    "material": "cotton",
+    "color": "negro",
+    "fit": "fitted",
+    "style": "formal",
+    "season": "winter",
+    "type": "falda"
+  },
+  "assets/images/clothes/jersey_cremallera_rallas_blanco_y_negro.png": {
+    "material": "wool",
+    "color": "negro",
+    "fit": "baggy",
+    "style": "casual",
+    "season": "winter",
+    "type": "jersey"
+  },
+  "assets/images/clothes/jersey_cuello_alto_beige.png": {
+    "material": "wool",
+    "color": "beige",
+    "fit": "fitted",
+    "style": "formal",
+    "season": "winter",
+    "type": "jersey"
+  },
+  "assets/images/clothes/jersey_cuello_alto_gris_oscuro.png": {
+    "material": "wool",
+    "color": "gris",
+    "fit": "fitted",
+    "style": "formal",
+    "season": "winter",
+    "type": "jersey"
+  },
+  "assets/images/clothes/jersey_finio_negro_basico.png": {
+    "material": "cotton",
+    "color": "negro",
+    "fit": "fitted",
+    "style": "casual",
+    "season": "winter",
+    "type": "jersey"
+  },
+  "assets/images/clothes/pantalon_largo_azul_vaquero.png": {
+    "material": "denim",
+    "color": "azul",
+    "fit": "baggy",
+    "style": "casual",
+    "season": "winter",
+    "type": "pantalones"
+  },
+  "assets/images/clothes/pantalon_largo_beige_vaquero.png": {
+    "material": "denim",
+    "color": "beige",
+    "fit": "fitted",
+    "style": "casual",
+    "season": "winter",
+    "type": "pantalones"
+  },
+  "assets/images/clothes/pantalon_largo_gris_vaquero_ralla.png": {
+    "material": "denim",
+    "color": "gris",
+    "fit": "baggy",
+    "style": "casual",
+    "season": "winter",
+    "type": "pantalones"
+  },
+  "assets/images/clothes/pantalon_largo_verde_vaquero.png": {
+    "material": "denim",
+    "color": "verde",
+    "fit": "baggy",
+    "style": "casual",
+    "season": "winter",
+    "type": "pantalones"
+  },
+  "assets/images/clothes/short_corto_gris_vaquero.png": {
+    "material": "denim",
+    "color": "gris",
+    "fit": "skinny",
+    "style": "casual",
+    "season": "summer",
+    "type": "shorts"
+  },
+  "assets/images/clothes/short_largo_azul_vaquero.png": {
+    "material": "denim",
+    "color": "azul",
+    "fit": "baggy",
+    "style": "casual",
+    "season": "summer",
+    "type": "shorts"
+  },
+  "assets/images/clothes/top_bandeau_amarillo.png": {
+    "material": "cotton",
+    "color": "amarillo",
+    "fit": "fitted",
+    "style": "casual",
+    "season": "summer",
+    "type": "top"
+  },
+  "assets/images/clothes/top_bandeau_blanco.png": {
+    "material": "cotton",
+    "color": "blanco",
+    "fit": "fitted",
+    "style": "casual",
+    "season": "summer",
+    "type": "top"
+  },
+  "assets/images/clothes/top_bandeau_rosa.png": {
+    "material": "cotton",
+    "color": "rosa",
+    "fit": "fitted",
+    "style": "casual",
+    "season": "summer",
+    "type": "top"
+  },
+  "assets/images/clothes/top_blanco_tirantes_h&m.png": {
+    "material": "cotton",
+    "color": "blanco",
+    "fit": "fitted",
+    "style": "casual",
+    "season": "summer",
+    "type": "top"
+  },
+  "assets/images/clothes/top_blusa_blanco_topos_negros.png": {
+    "material": "silk",
+    "color": "blanco",
+    "fit": "fitted",
+    "style": "formal",
+    "season": "summer",
+    "type": "camisa"
+  },
+  "assets/images/clothes/top_sin_mangas_granate_formal.png": {
+    "material": "silk",
+    "color": "granate",
+    "fit": "fitted",
+    "style": "formal",
+    "season": "winter",
+    "type": "top"
+  },
+  "assets/images/clothes/vestido_amarillo_flores.png": {
+    "material": "cotton",
+    "color": "amarillo",
+    "fit": "fitted",
+    "style": "casual",
+    "season": "summer",
+    "type": "vestidos"
+  },
+  "assets/images/clothes/vestido_granate_cruzado.png": {
+    "material": "silk",
+    "color": "granate",
+    "fit": "fitted",
+    "style": "formal",
+    "season": "winter",
+    "type": "vestidos"
+  }
+}

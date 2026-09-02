@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Clueless Closet">
+    <link rel="apple-touch-icon" href="assets/images/icon-192.png">
+    <link rel="stylesheet" href="reset.css">
+    <link rel="stylesheet" href="styles.css">
+    <title>Ugh, as if! | CHER'S WARDROBE</title>
+    <link rel="icon" type="image/x-icon" href="assets/images/pc.png">
+</head>
+
+<body>
+
+    <nav>
+        <ul>
+            <li>ISA'S WARDROBE</li>
+            <li class="seasonContainer">
+                <div class="smallBtn" id="seasonBtn">TEMPORADA DE INVIERNO</div>
+                <div id="seasonDropdown" class="noDisplay">
+                    <div class="smallBtn seasonOption" data-season="winter">TEMPORADA DE INVIERNO</div>
+                    <div class="smallBtn seasonOption" data-season="summer">TEMPORADA DE VERANO</div>
+                </div>
+            </li>
+            <li></li>
+        </ul>
+    </nav>
+
+    <main>
+        <div>
+            <div class="bigBtn" id="browseBtn">BROWSE</div>
+
+            <div id="clothesDiv">
+                <div id="topCarousel">
+                    <div class="carouselContainer"></div>
+                </div>
+
+                <div class="carouselBtnDiv">
+                    <span class="carouselBtn top prev">◂◂</span>
+                    <span class="carouselBtn top next">▸</span>
+                    <span class="carouselBtn top next">▸▸</span>
+                </div>
+
+                <div id="bottomCarousel">
+                    <div class="carouselContainer"></div>
+                </div>
+                
+                <div class="carouselBtnDiv">
+                    <span class="carouselBtn bottom prev">◂◂</span>
+                    <span class="carouselBtn bottom next">▸</span>
+                    <span class="carouselBtn bottom next">▸▸</span>
+                </div>
+                <div id="tryOnContainer" class="noDisplay">
+                    <div class="tryOnPreviewArea">
+                        <img id="tryOnModelImg" src="assets/images/models/modelo_isa_1.png" alt="Model Preview">
+                        <div id="tryOnStatus" class="noDisplay">
+                            <div class="spinner"></div>
+                            <span id="tryOnStatusText">GENERATING OUTFIT WITH IDM-VTON...</span>
+                        </div>
+                    </div>
+                    <div class="tryOnControls">
+                        <button id="runTryOnBtn" class="smallBtn">TRY ON WITH AI</button>
+                        <button id="closeTryOnBtn" class="smallBtn">CLOSE</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bigBtn" id="dressMeBtn">DRESS ME</div>
+        </div>
+    </main>
+
+    <footer>
+        <ul>
+            <!-- <li>SHOES</li> -->
+            <!-- <li>JEWELRY</li> -->
+            <!-- <li>SCARVES</li> -->
+            <!-- <li>PANTYHOSE</li> -->
+            <!-- <li>UNDERWEAR</li> -->
+            <!-- <li>PANTS</li> -->
+            <li class="typeFilter" data-type="top" data-category="top">TOP</li>
+            <li class="typeFilter" data-type="camiseta" data-category="top">CAMISETA</li>
+            <li class="typeFilter" data-type="camisa" data-category="top">CAMISA</li>
+            <li class="typeFilter" data-type="jersey" data-category="top">JERSEY</li>
+            <li class="typeFilter" data-type="falda" data-category="bottom">FALDA</li>
+            <li class="typeFilter" data-type="shorts" data-category="bottom">SHORTS</li>
+            <li class="typeFilter" data-type="pantalones" data-category="bottom">PANTALONES</li>
+            <li class="typeFilter" data-type="vestidos" data-category="dress">VESTIDOS</li>
+
+
+            <li>
+                <a href="https://github.com/praxeds" target="_blank"><div class="smallBtn">MORE</div></a>
+            </li>
+        </ul>
+    </footer>
+
+    <aside id="popUpDiv" class="noDisplay">
+        <div id="popUp">
+            <div id="popUpText"></div>
+            <div id="popUpButtons" class="noDisplay">
+                <button id="popUpYesBtn" class="smallBtn">YES</button>
+                <button id="popUpNoBtn" class="smallBtn">NO</button>
+            </div>
+        </div>
+        <div id="popUpShadow"></div>
+    </aside>
+    <!-- <aside id="overlay"></aside> -->
+    <script src="script.js"></script>
+</body>
+
+</html>
