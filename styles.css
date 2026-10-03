@@ -134,18 +134,38 @@
     z-index: 99;
 }
 
+html,
 body {
+    width: 100%;
+    height: 100%;
     height: 100vh;
+    height: 100dvh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    /* Evita el scroll táctil y el rebote en iOS */
+    touch-action: none;
+    -webkit-overflow-scrolling: auto;
+    overscroll-behavior: none;
+    box-sizing: border-box;
+}
+
+body {
     display: flex;
     flex-direction: column;
     font-family: "Pixellari";
-    overflow: hidden;
 }
 
 main {
     flex: 1;
+    height: 0;
+    min-height: 0;
     background: palevioletred;
     overflow: hidden;
+    box-sizing: border-box;
 }
 
 a {
@@ -158,16 +178,14 @@ nav {
 
 nav,
 footer {
-    height: 3%;
+    height: 6vh;
+    min-height: 35px;
     background: black;
     display: flex;
     align-items: center;
-    padding: 2.5vmin;
-}
-
-main {
-    flex: 1;
-    background: palevioletred;
+    padding: 1vmin 2.5vmin;
+    box-sizing: border-box;
+    flex-shrink: 0;
 }
 
 nav>ul,
@@ -220,6 +238,8 @@ main>div {
     display: flex;
     justify-content: center;
     align-items: center;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 #clothesDiv {
@@ -228,13 +248,18 @@ main>div {
     display: flex;
     flex-direction: column;
     align-items: center;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 .carouselBtnDiv {
     width: 100%;
     height: 8vh;
+    max-height: 12%;
+    flex-shrink: 0;
     display: flex;
     justify-content: center;
+    box-sizing: border-box;
 }
 
 #topCarousel,
@@ -511,6 +536,8 @@ img {
     display: flex;
     justify-content: center;
     align-items: center;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 .moreBox {
