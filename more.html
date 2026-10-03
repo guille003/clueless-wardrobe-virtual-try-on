@@ -4,10 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
+
+    <!-- Indica a iOS que la webapp se ejecute en pantalla completa sin la interfaz de Safari -->
     <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <!-- Define el estilo de la barra superior de estado -->
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Clueless Closet">
     <link rel="apple-touch-icon" href="assets/images/icon-192.png">
@@ -23,7 +27,9 @@
         <ul>
             <li>ISA'S WARDROBE</li>
             <li></li>
-            <li><div class="smallBtn" id="settingsBtn">⚙</div></li>
+            <li>
+                <div class="smallBtn" id="settingsBtn">⚙</div>
+            </li>
         </ul>
     </nav>
 
@@ -64,7 +70,9 @@
     <footer>
         <ul class="moreFooterUl">
             <li>
-                <a href="index.html"><div class="smallBtn">BACK</div></a>
+                <a href="index.html">
+                    <div class="smallBtn">BACK</div>
+                </a>
             </li>
         </ul>
     </footer>
