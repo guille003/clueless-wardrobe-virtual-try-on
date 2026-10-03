@@ -389,7 +389,7 @@ img {
     font-size: 3.5vw;
     padding: 2vw 0.8vw;
     padding-top: 3vw;
-    align-self: end;
+    align-self: flex-end;
     min-width: 18vw;
     display: inline-flex;
     justify-content: center;
