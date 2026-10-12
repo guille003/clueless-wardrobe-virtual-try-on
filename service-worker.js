@@ -1,4 +1,4 @@
-const CACHE_NAME = 'clueless-closet-v3';
+const CACHE_NAME = 'clueless-closet-v4';
 
 const PRECACHE_ASSETS = [
     './',

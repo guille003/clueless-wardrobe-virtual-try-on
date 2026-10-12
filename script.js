@@ -683,91 +683,377 @@ if (runTryOnBtn) {
     })
 }
 
+// ==========================================
+// Virtual Try-On (IDM-VTON) Compatibility Layer
+// Compatible with Chrome, modern browsers, and Safari on iPad iOS 12
+// 1. Eliminates all unnecessary custom headers (avoids Safari CORS preflight OPTIONS blocks)
+// 2. Supports routing through a public/private CORS proxy for testing and prototyping
+// ==========================================
+
+const HF_SPACE_BASE_URL = 'https://yisol-idm-vton.hf.space';
+const DEFAULT_PUBLIC_CORS_PROXY = 'https://corsproxy.io/?url=';
+
+let configuredCorsProxy = localStorage.getItem('vton_cors_proxy') || '';
+const corsProxyToggleBtn = document.getElementById('corsProxyToggleBtn');
+
+function formatProxiedUrl(targetUrl, proxy) {
+    if (!proxy || typeof proxy !== 'string' || !proxy.trim()) {
+        return targetUrl;
+    }
+    const cleanProxy = proxy.trim();
+    if (cleanProxy.indexOf('?url=') !== -1) {
+        return cleanProxy + encodeURIComponent(targetUrl);
+    }
+    return cleanProxy.endsWith('/') ? (cleanProxy + targetUrl) : (cleanProxy + '/' + targetUrl);
+}
+
+function updateCorsProxyBtnUI() {
+    if (!corsProxyToggleBtn) return;
+    if (configuredCorsProxy && configuredCorsProxy.trim()) {
+        corsProxyToggleBtn.innerText = 'PROXY: ON';
+        corsProxyToggleBtn.title = 'Proxy CORS activo: ' + configuredCorsProxy;
+        corsProxyToggleBtn.style.color = '#ffff00';
+    } else {
+        corsProxyToggleBtn.innerText = 'PROXY: OFF';
+        corsProxyToggleBtn.title = 'Conexión directa (sin proxy). Haz clic para configurar proxy CORS.';
+        corsProxyToggleBtn.style.color = '';
+    }
+}
+
+if (corsProxyToggleBtn) {
+    updateCorsProxyBtnUI();
+    corsProxyToggleBtn.addEventListener('click', function () {
+        playSound(clickSound);
+        const current = configuredCorsProxy || '';
+        const defaultPrompt = current || DEFAULT_PUBLIC_CORS_PROXY;
+        const choice = prompt(
+            'Configuración de Proxy CORS para Safari en iPad / pruebas:\n\n' +
+            '• Introduce la URL del proxy (ej: https://corsproxy.io/?url= o https://api.allorigins.win/raw?url=)\n' +
+            '• O deja el campo vacío para usar conexión directa sin proxy.',
+            defaultPrompt
+        );
+
+        if (choice === null) return;
+
+        const trimmed = choice.trim();
+        configuredCorsProxy = trimmed;
+        if (trimmed) {
+            localStorage.setItem('vton_cors_proxy', trimmed);
+        } else {
+            localStorage.removeItem('vton_cors_proxy');
+        }
+        updateCorsProxyBtnUI();
+    });
+}
+
 async function urlToBlob(url) {
-    const response = await fetch(url)
-    return await response.blob()
+    const response = await fetch(url, { credentials: 'same-origin' });
+    if (!response.ok) {
+        throw new Error('Failed to fetch image blob: ' + url);
+    }
+    return await response.blob();
 }
 
 async function prepareGarmentBlob(topImg, bottomImg) {
-    const target = isVestidosMode ? topImg : (topImg || bottomImg)
-    if (!target) return null
-    const src = target.getAttribute('src') || target.src
-    return await urlToBlob(src)
+    const target = isVestidosMode ? topImg : (topImg || bottomImg);
+    if (!target) return null;
+    const src = target.getAttribute('src') || target.src;
+    return await urlToBlob(src);
 }
 
-async function safeDynamicImport(moduleUrl) {
-    try {
-        const dynamicImportFn = new Function('url', 'return import(url)')
-        return await dynamicImportFn(moduleUrl)
-    } catch (err) {
-        throw new Error('Dynamic module import is not supported in this browser: ' + err.message)
+// 1. Upload files with NO custom headers (Safari iOS 12 CORS safe)
+async function vtonUploadFiles(modelBlob, garmentBlob, proxy) {
+    const uploadUrl = formatProxiedUrl(HF_SPACE_BASE_URL + '/upload', proxy);
+    const formData = new FormData();
+    formData.append('files', modelBlob, 'model.png');
+    formData.append('files', garmentBlob, 'garment.png');
+
+    // IMPORTANT: Do NOT define headers object!
+    // Browser automatically sets Content-Type: multipart/form-data with boundary.
+    // Setting credentials: 'omit' prevents strict credential preflight failures in Safari.
+    const response = await fetch(uploadUrl, {
+        method: 'POST',
+        body: formData,
+        credentials: 'omit'
+    });
+
+    if (!response.ok) {
+        throw new Error('Upload failed with status ' + response.status);
     }
+
+    const uploaded = await response.json();
+    if (!uploaded || !Array.isArray(uploaded) || uploaded.length < 2) {
+        throw new Error('Invalid upload response from HF Space');
+    }
+    return uploaded;
+}
+
+// 2. Start prediction with strictly necessary headers only
+async function vtonStartPrediction(modelPath, garmentPath, description, proxy) {
+    const callUrl = formatProxiedUrl(HF_SPACE_BASE_URL + '/call/tryon', proxy);
+    const payload = {
+        data: [
+            {
+                background: {
+                    path: modelPath,
+                    url: HF_SPACE_BASE_URL + '/file=' + modelPath,
+                    orig_name: 'model.png',
+                    meta: { _type: 'gradio.FileData' }
+                },
+                layers: [],
+                composite: null
+            },
+            {
+                path: garmentPath,
+                url: HF_SPACE_BASE_URL + '/file=' + garmentPath,
+                orig_name: 'garment.png',
+                meta: { _type: 'gradio.FileData' }
+            },
+            description || 'fashion outfit garment',
+            true,  // is_checked (auto mask)
+            false, // is_checked_crop
+            30,    // denoise_steps
+            42     // seed
+        ]
+    };
+
+    // ONLY the single standard 'Content-Type' header is sent.
+    // No custom headers (no x-gradio-user, no Authorization, no cookies).
+    const response = await fetch(callUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload),
+        credentials: 'omit'
+    });
+
+    if (!response.ok) {
+        throw new Error('Prediction call failed with status ' + response.status);
+    }
+
+    const data = await response.json();
+    if (!data || !data.event_id) {
+        throw new Error('Missing event_id in prediction response');
+    }
+    return data.event_id;
+}
+
+// 3. Fallback stream reader using standard fetch
+async function vtonListenFetchFallback(streamUrl, onProgress) {
+    const response = await fetch(streamUrl, {
+        method: 'GET',
+        credentials: 'omit'
+    });
+
+    if (!response.ok) {
+        throw new Error('Stream request failed with status ' + response.status);
+    }
+
+    if (response.body && response.body.getReader) {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+            const result = await reader.read();
+            if (result.done) break;
+            const chunk = decoder.decode(result.value, { stream: true });
+            buffer += chunk;
+
+            if (buffer.indexOf('event: heartbeat') !== -1 && onProgress) {
+                onProgress('WAITING IN GPU QUEUE...');
+            }
+            if (buffer.indexOf('event: generating') !== -1 && onProgress) {
+                onProgress('GENERATING OUTFIT WITH IDM-VTON...');
+            }
+            if (buffer.indexOf('event: complete') !== -1) {
+                const match = buffer.match(/event:\s*complete\s+data:\s*(\[.*?\])/);
+                if (match) {
+                    return JSON.parse(match[1]);
+                }
+            }
+            if (buffer.indexOf('event: error') !== -1) {
+                throw new Error('HF Space returned event error');
+            }
+        }
+    } else {
+        const text = await response.text();
+        const match = text.match(/event:\s*complete\s+data:\s*(\[.*?\])/);
+        if (match) {
+            return JSON.parse(match[1]);
+        }
+    }
+
+    throw new Error('Stream finished without complete event');
+}
+
+// 4. Listen to SSE results stream (native EventSource + streaming fetch fallback)
+function vtonListenEventStream(eventId, proxy, onProgress) {
+    return new Promise(function (resolve, reject) {
+        const directStreamUrl = HF_SPACE_BASE_URL + '/call/tryon/' + eventId;
+        const streamUrl = formatProxiedUrl(directStreamUrl, proxy);
+
+        let isCompleted = false;
+        let eventSource = null;
+
+        const timer = setTimeout(function () {
+            if (!isCompleted) {
+                if (eventSource) {
+                    try { eventSource.close(); } catch (e) {}
+                }
+                reject(new Error('Try-on request timed out after 120s'));
+            }
+        }, 120000);
+
+        function cleanup() {
+            clearTimeout(timer);
+            if (eventSource) {
+                try { eventSource.close(); } catch (e) {}
+                eventSource = null;
+            }
+        }
+
+        try {
+            eventSource = new EventSource(streamUrl);
+
+            eventSource.addEventListener('heartbeat', function () {
+                if (onProgress) onProgress('WAITING IN GPU QUEUE...');
+            });
+
+            eventSource.addEventListener('generating', function () {
+                if (onProgress) onProgress('GENERATING OUTFIT WITH IDM-VTON...');
+            });
+
+            eventSource.addEventListener('complete', function (e) {
+                isCompleted = true;
+                cleanup();
+                try {
+                    const data = JSON.parse(e.data);
+                    resolve(data);
+                } catch (err) {
+                    reject(new Error('Failed to parse complete event: ' + err.message));
+                }
+            });
+
+            eventSource.addEventListener('error', function () {
+                if (isCompleted) return;
+                // If EventSource disconnects or proxy buffers SSE, fallback to fetch
+                cleanup();
+                vtonListenFetchFallback(streamUrl, onProgress)
+                    .then(function (data) {
+                        isCompleted = true;
+                        resolve(data);
+                    })
+                    .catch(function (fetchErr) {
+                        reject(fetchErr);
+                    });
+            });
+        } catch (esError) {
+            cleanup();
+            vtonListenFetchFallback(streamUrl, onProgress)
+                .then(resolve)
+                .catch(reject);
+        }
+    });
+}
+
+// Execute complete VTON pipeline
+async function executeVtonPipeline(modelBlob, garmentBlob, description, proxy) {
+    if (tryOnStatusText) {
+        tryOnStatusText.innerText = proxy
+            ? 'CONNECTING VIA CORS PROXY...'
+            : 'CONNECTING TO IDM-VTON AI...';
+    }
+
+    if (tryOnStatusText) tryOnStatusText.innerText = 'UPLOADING GARMENT TO AI...';
+    const uploadedPaths = await vtonUploadFiles(modelBlob, garmentBlob, proxy);
+
+    if (tryOnStatusText) tryOnStatusText.innerText = 'QUEUED IN IDM-VTON AI...';
+    const eventId = await vtonStartPrediction(uploadedPaths[0], uploadedPaths[1], description, proxy);
+
+    if (tryOnStatusText) tryOnStatusText.innerText = 'GENERATING TRY-ON WITH IDM-VTON...';
+    const resultData = await vtonListenEventStream(eventId, proxy, function (msg) {
+        if (tryOnStatusText) tryOnStatusText.innerText = msg;
+    });
+
+    return resultData;
 }
 
 async function runVirtualTryOn() {
-    if (!tryOnStatus || !tryOnModelImg) return
+    if (!tryOnStatus || !tryOnModelImg) return;
 
-    tryOnStatus.classList.remove('noDisplay')
-    if (tryOnStatusText) tryOnStatusText.innerText = "CONNECTING TO IDM-VTON AI..."
+    tryOnStatus.classList.remove('noDisplay');
+    if (tryOnStatusText) tryOnStatusText.innerText = "CONNECTING TO IDM-VTON AI...";
 
-    const garmentImg = isVestidosMode ? currentTop : (currentTop || currentBottom)
+    const garmentImg = isVestidosMode ? currentTop : (currentTop || currentBottom);
     if (!garmentImg) {
-        if (tryOnStatusText) tryOnStatusText.innerText = "NO GARMENT SELECTED!"
-        setTimeout(() => tryOnStatus.classList.add('noDisplay'), 2000)
-        return
+        if (tryOnStatusText) tryOnStatusText.innerText = "NO GARMENT SELECTED!";
+        setTimeout(() => tryOnStatus.classList.add('noDisplay'), 2000);
+        return;
     }
 
-    const modelSrc = selectedModelPath
-    const garmentData = getGarmentData(garmentImg)
+    const modelSrc = selectedModelPath;
+    const garmentData = getGarmentData(garmentImg);
 
-    let garmentDescription = "fashion outfit garment"
+    let garmentDescription = "fashion outfit garment";
     if (garmentData) {
-        garmentDescription = `${garmentData.color || ''} ${garmentData.type || 'garment'}`.trim()
+        garmentDescription = `${garmentData.color || ''} ${garmentData.type || 'garment'}`.trim();
     }
 
     try {
-        const gradioModule = await safeDynamicImport('https://cdn.jsdelivr.net/npm/@gradio/client/+esm')
-        const { Client, handle_file } = gradioModule
-        if (tryOnStatusText) tryOnStatusText.innerText = "GENERATING TRY-ON WITH IDM-VTON..."
+        if (tryOnStatusText) tryOnStatusText.innerText = "PREPARING IMAGES...";
+        const modelBlob = await urlToBlob(modelSrc);
+        const garmentBlob = await prepareGarmentBlob(currentTop, currentBottom);
 
-        const modelBlob = await urlToBlob(modelSrc)
-        const garmentBlob = await prepareGarmentBlob(currentTop, currentBottom)
+        if (!modelBlob || !garmentBlob) {
+            throw new Error("Could not load image blobs for model or garment");
+        }
 
-        const modelFile = handle_file(modelBlob)
-        const garmentFile = handle_file(garmentBlob)
+        let resultData = null;
+        const initialProxy = configuredCorsProxy;
 
-        const client = await Client.connect("yisol/IDM-VTON")
-
-        const result = await client.predict("/tryon", [
-            { background: modelFile, layers: [], composite: null },
-            garmentFile,
-            garmentDescription,
-            true,
-            false,
-            30,
-            42
-        ])
-
-        if (result && result.data && result.data[0]) {
-            const item = result.data[0]
-            const resultUrl = typeof item === 'string' ? item : (item.url || item.path)
-            if (resultUrl) {
-                tryOnModelImg.src = resultUrl
-                tryOnStatus.classList.add('noDisplay')
-                return
+        try {
+            // First attempt: try with current proxy setting (or direct if empty)
+            resultData = await executeVtonPipeline(modelBlob, garmentBlob, garmentDescription, initialProxy);
+        } catch (firstErr) {
+            console.warn("First VTON attempt failed:", firstErr);
+            // If direct failed without proxy (e.g. CORS preflight blocked by Safari on iPad), auto-retry through proxy
+            if (!initialProxy) {
+                console.log("Direct request failed; attempting fallback via public CORS proxy...");
+                if (tryOnStatusText) {
+                    tryOnStatusText.innerText = "CORS BLOCKED: RETRYING VIA PROXY...";
+                }
+                resultData = await executeVtonPipeline(modelBlob, garmentBlob, garmentDescription, DEFAULT_PUBLIC_CORS_PROXY);
+            } else {
+                throw firstErr;
             }
         }
-    } catch (err) {
-        console.warn("IDM-VTON Space API call error:", err)
-    }
 
-    if (tryOnStatusText) {
-        tryOnStatusText.innerText = "HF QUEUE BUSY. CLICK 'TRY ON WITH AI' TO RETRY."
+        if (resultData && resultData[0]) {
+            const item = resultData[0];
+            const resultUrl = typeof item === 'string'
+                ? item
+                : (item.url || (HF_SPACE_BASE_URL + '/file=' + item.path));
+
+            if (resultUrl) {
+                tryOnModelImg.src = resultUrl;
+                tryOnStatus.classList.add('noDisplay');
+                return;
+            }
+        }
+
+        throw new Error("No image URL received in completion data");
+    } catch (err) {
+        console.warn("IDM-VTON API call error:", err);
+        if (tryOnStatusText) {
+            tryOnStatusText.innerText = "HF QUEUE BUSY OR CORS ERROR. CLICK TO RETRY.";
+        }
     }
 
     setTimeout(() => {
-        tryOnStatus.classList.add('noDisplay')
-    }, 3000)
+        tryOnStatus.classList.add('noDisplay');
+    }, 3500);
 }
 
 function setRandomImage(carousel, isTop, prefilteredAvailable) {
