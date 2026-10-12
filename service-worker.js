@@ -1,4 +1,4 @@
-const CACHE_NAME = 'clueless-closet-v4';
+const CACHE_NAME = 'clueless-closet-v3';
 
 const PRECACHE_ASSETS = [
     './',
@@ -95,8 +95,8 @@ self.addEventListener('fetch', (event) => {
     }
 
     const isNavigation = event.request.mode === 'navigate' ||
-                         event.request.destination === 'document' ||
-                         (event.request.headers && event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html'));
+        event.request.destination === 'document' ||
+        (event.request.headers && event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html'));
 
     // Handle Navigation / Document Requests (iOS PWA launch & reload)
     if (isNavigation) {
